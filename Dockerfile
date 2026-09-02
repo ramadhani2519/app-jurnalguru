@@ -1,20 +1,16 @@
-FROM php:8.1-apache
+FROM php:8.1-cli
 
-# Install ekstensi database
+# Install ekstensi MySQL
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Aktifkan mod_rewrite untuk CodeIgniter 4
-RUN a2enmod rewrite
+# Set working directory
+WORKDIR /var/www/html
 
-# Copy seluruh project ke container
-COPY . /var/www/html/
+# Copy seluruh file project
+COPY . .
 
-# Arahkan DocumentRoot ke folder public CodeIgniter 4
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/conf-available/*.conf
+# Expose port yang digunakan
+EXPOSE 8080
 
-EXPOSE 80
-
-# Bersihkan file konfigurasi MPM ganda sebelum menjalankan Apache
-CMD ["sh", "-c", "rm -f /etc/apache2/mods-enabled/mpm_*.load /etc/apache2/mods-enabled/mpm_*.conf && a2enmod mpm_prefork && apache2-foreground"]
+# Jalankan server bawaan CodeIgniter / PHP
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
